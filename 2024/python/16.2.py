@@ -168,7 +168,6 @@ for a in range(0, len(themap)):
 
 to_explore = [(i, j, 0, 0, i, j)]
 explored = {}
-score = {}
 best = {(i, j)}
 bests = []
 
@@ -182,34 +181,38 @@ while to_explore != []:
     i, j, dir, r, i1, j1 = to_explore.pop(0)
     if themap[i][j] == "E":
         best.add((i,j))
-        if bests == [] or score[bests[0]]==r:
-            bests.append((i1, j1))
-        elif score[bests[-1]]>r:
-            bests = [(i1, j1)]
+        if bests == [] or bests[0][-1]==r:
+            bests.append((i1, j1, r))
+        elif bests[0][-1]>r:
+            bests = [(i1, j1, r)]
     else:
-        if ((i, j) in score and score[(i, j)] > r) or (i, j) not in score:
+        if (i, j) not in explored:
             if themap[i+1][j] !="#":
                 res = calc(dir, 1) * 1000 + 1
-                to_explore.append((i+1, j, 1, r + res, i, j))
+                to_explore.append((i+1, j, 1, res, i, j))
             if themap[i-1][j] !="#":
                 res = calc(dir, 3) * 1000 + 1
-                to_explore.append((i-1, j, 3, r + res, i, j))
+                to_explore.append((i-1, j, 3, res, i, j))
             if themap[i][j+1] !="#":
                 res = calc(dir, 0) * 1000 + 1
-                to_explore.append((i, j+1, 0, r + res, i, j))
+                to_explore.append((i, j+1, 0, res, i, j))
             if themap[i][j-1] !="#":
                 res = calc(dir, 2) * 1000 + 1
-                to_explore.append((i, j-1, 2, r + res, i, j))
-            explored[(i, j)] = [(i1, j1)]
-            score[(i, j)] = r
-        elif score[(i, j)] >= r:
-            explored[(i, j)].append((i1, j1))
+                to_explore.append((i, j-1, 2, res, i, j))
+            explored[(i, j)] = {(i1, j1, r)}
+        else:
+            explored[(i, j)].add((i1, j1, r))
 
-def explore(a):
-    if a != explored[a][0]:
-        for i in explored[a]:
-            best.add(i)
-            explore(i)
-for a in bests:
-    explore(a)               
+def explore(a, n, q, l=[]):
+    i, j = a
+    if (i, j, q) in explored[a]:
+        print(n, l)
+        if n == 7036:
+            for i in l:
+                best.add(i)
+    if a not in l:
+        for m, k, r in explored[a]:
+            explore((m, k), n+r, r, l+[a])
+for (i, j, r) in bests:
+    explore((i, j), r, r)               
 print(len(best))
